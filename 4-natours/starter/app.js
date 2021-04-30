@@ -6,12 +6,8 @@ const app = express();
 // middleware to parse req body
 app.use(express.json());
 
-// it's sync because it's out of even loop
-const toursSimple = JSON.parse(
-  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
-);
-
-const home = app.get("/api/v1/tours", (req, res) => {
+// reqeust handlers
+const getAllTours = (req, res) => {
   res.status(200).json({
     status: "success",
     results: toursSimple.length,
@@ -21,10 +17,9 @@ const home = app.get("/api/v1/tours", (req, res) => {
       },
     },
   });
-});
+};
 
-// ? makes param optional
-app.get("/api/v1/tours/:id", (req, res) => {
+const getTourById = (req, res) => {
   // look up of a post
   const post =
     toursSimple[req.params.id] !== undefined
@@ -43,9 +38,9 @@ app.get("/api/v1/tours/:id", (req, res) => {
       },
     },
   });
-});
+};
 
-app.patch("/api/v1/tours/:id", (req, res) => {
+const updateTour = (req, res) => {
   // look up of a post
   const post =
     toursSimple[req.params.id] !== undefined
@@ -64,9 +59,9 @@ app.patch("/api/v1/tours/:id", (req, res) => {
       tours: "updated",
     },
   });
-});
+};
 
-app.delete("/api/v1/tours/:id", (req, res) => {
+const deleteTour = (req, res) => {
   // look up of a post
   const post =
     toursSimple[req.params.id] !== undefined
@@ -85,9 +80,9 @@ app.delete("/api/v1/tours/:id", (req, res) => {
       data: null,
     },
   });
-});
+};
 
-app.post("/api/v1/tours", (req, res) => {
+const createTour = (req, res) => {
   console.log(req.body);
   const newId = toursSimple[toursSimple.length - 1].id + 1;
 
@@ -112,7 +107,19 @@ app.post("/api/v1/tours", (req, res) => {
   );
   // always send back a response to finish a request/response cycle
   // res.send("done");
-});
+};
+
+// it's sync because it's out of even loop
+const toursSimple = JSON.parse(
+  fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
+);
+
+app.route("/api/v1/tours").get(getAllTours).post(createTour);
+app
+  .route("/api/v1/tours/:id")
+  .get(getTourById)
+  .patch(updateTour)
+  .delete(deleteTour);
 
 const PORT = 5000;
-app.listen(PORT, home, () => console.log(`listening on port: ${PORT}...`));
+app.listen(PORT, () => console.log(`listening on port: ${PORT}...`));
