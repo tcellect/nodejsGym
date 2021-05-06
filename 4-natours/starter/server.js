@@ -1,6 +1,20 @@
+const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const app = require("./app");
 dotenv.config({ path: "./config.env" });
+
+const DB = process.env.CONNECTION_STRING_DB.replace(
+  "<PASSWORD>",
+  process.env.PASSWORD
+);
+mongoose
+  .connect(DB, {
+    useNewUrlParser: true,
+    useCreateIndex: true,
+    useUnifiedTopology: true,
+    useFindAndModify: false,
+  })
+  .then(() => console.log("connected to cluster"));
 
 // here belong configurations not related to express
 const PORT = process.env.PORT || 5000;
