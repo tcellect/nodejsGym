@@ -1,8 +1,27 @@
 const Tour = require("../models/tourModel");
+const APIfeatures = require("../utils/apiFeatures");
+
+exports.aliasTopTours = (req, res, next) => {
+  req.query.limit = 5;
+  req.query.sort = "-ratingsAverage, price";
+  req.query.fields = "name, price, ratingAverage, summary, difficulty";
+  next();
+};
 
 exports.getAllTours = async (req, res) => {
   try {
-    const allTours = await Tour.find();
+    // BUILD QUERY
+    const features = new APIfeatures(Tour.find(), req.query)
+      .filter()
+      .sorting()
+      .fields()
+      .pagination();
+
+    // SEND QUERY
+    // as soon as the promise below resolves.
+    // it will not be possible to chain other queries
+    // like pagination, limiting etc
+    const allTours = await features.query;
     res.status(200).json({
       status: "success",
       results: allTours.length,
