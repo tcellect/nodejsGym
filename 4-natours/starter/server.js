@@ -3,6 +3,11 @@ const dotenv = require("dotenv");
 dotenv.config({ path: "./config.env" });
 const app = require("./app");
 
+process.on("uncaughtException", (err) => {
+  console.log(err.name, err.message);
+  process.exit(1);
+});
+
 const DB = process.env.CONNECTION_STRING_DB.replace(
   "<PASSWORD>",
   process.env.PASSWORD
@@ -18,4 +23,13 @@ mongoose
 
 // here belong configurations not related to express
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`listening on port: ${PORT}...`));
+const server = app.listen(PORT, () =>
+  console.log(`listening on port: ${PORT}...`)
+);
+
+process.on("unhandledRejection", (err) => {
+  console.log(err.name, err.message);
+  server.close(() => {
+    process.exit(1);
+  });
+});

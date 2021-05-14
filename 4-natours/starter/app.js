@@ -2,6 +2,8 @@ const express = require("express");
 const morgan = require("morgan");
 const toursRouter = require("./routs/toursRouter");
 const usersRouter = require("./routs/usersRouter");
+const globalErrorHandler = require("./controllers/errorController");
+const AppError = require("./utils/appError");
 
 // this file is a root for express related stuff
 const app = express();
@@ -22,5 +24,12 @@ app.use((req, res, next) => {
 // mount routers
 app.use("/api/v1/tours/", toursRouter);
 app.use("/api/v1/users/", usersRouter);
+app.all("*", (req, res, next) => {
+  next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
+});
+
+// error handling middleware
+// express recognizes that signature as error handling function
+app.use(globalErrorHandler);
 
 module.exports = app;
